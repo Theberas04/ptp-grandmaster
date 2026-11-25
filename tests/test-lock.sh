@@ -103,6 +103,7 @@ GM_CONF="$K/etc/linuxptp/ptp4l-gm.conf"
 KLANT_CONF="$K/etc/linuxptp/ptp4l-klant.conf"
 toets "de grootmeesterconfiguratie is geschreven" test -s "$GM_CONF"
 toets "de clientconfiguratie is geschreven" test -s "$KLANT_CONF"
+chmod -R a+rX "$WERK" 2>/dev/null   # ook leesbaar voor een proces met een andere uid
 toets "grootmeester gebruikt L2 en software-tijdstempels" grep -qE '^network_transport *L2$' "$GM_CONF"
 toets "client zet clientOnly" grep -qE '^clientOnly *1$' "$KLANT_CONF"
 
@@ -134,6 +135,18 @@ if printf '%s' "$UIT" | grep -q 'GEEN-VETH'; then
 fi
 if printf '%s' "$UIT" | grep -qE 'Operation not permitted|unshare failed'; then
     overslaan "geen eigen netwerknaamruimte mogelijk: $(printf '%s' "$UIT" | head -1)"
+fi
+
+if grep -q 'failed to open configuration file' "$WERK/math.log" "$WERK/klant.log" 2>/dev/null; then
+    printf '\n  --- diagnose: ptp4l kan de configuratie niet lezen ---\n'
+    cat > "$WERK/diagnose.sh" <<EOF
+id -u; id
+ls -ld "$WERK" "$K" "$K/etc" "$K/etc/linuxptp"
+ls -l "$GM_CONF"
+head -c 60 "$GM_CONF"; echo
+grep -E ' /tmp | / ' /proc/mounts | head -4
+EOF
+    $NS bash "$WERK/diagnose.sh" 2>&1 | sed 's/^/    /'
 fi
 
 printf '\n  --- grootmeester ---\n'

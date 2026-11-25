@@ -28,14 +28,29 @@ jobs:
         run: bash tests/test-installer.sh
 
   sync-proef:
+    # De proef draait op Debian 13: dat is de doelomgeving (linuxptp 4.2) en
+    # daar kunnen we een eigen netwerknaamruimte maken. Ubuntu's ptp4l 4.4 op de
+    # runner kan geen configuratiebestand openen (zie het Ubuntu-proefje hieronder).
     runs-on: ubuntu-latest
+    container:
+      image: debian:13
+      options: --privileged
     steps:
       - uses: actions/checkout@v4
 
-      - name: linuxptp installeren
+      - name: linuxptp en iproute2 installeren
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq linuxptp
+          apt-get update -qq
+          apt-get install -y -qq linuxptp iproute2 >/dev/null
 
       - name: Echte synchronisatieproef (grootmeester + client op een veth-paar)
-        run: sudo -E bash tests/test-lock.sh --streng
+        run: bash tests/test-lock.sh --streng
+
+      - name: Ubuntu-proefje (waarom de proef niet op Ubuntu draait)
+        if: always()
+        run: |
+          printf '# proef\ndomainNumber 0\n' > /tmp/proef.conf
+          chmod 666 /tmp/proef.conf
+          echo "leesproef: $(cat /tmp/proef.conf | tr '\n' ' ')"
+          echo "ptp4l-versie: $(ptp4l -v 2>&1)"
+          timeout 5 ptp4l -f /tmp/proef.conf -i lo -S -m 2>&1 | head -2 || true

@@ -151,6 +151,9 @@ timeout 5 "$PTP4L" -f "$GM_CONF" -i lo -S -m -l 6 2>&1 | head -3
 cp "$GM_CONF" /tmp/ptp-proef.conf; chmod 666 /tmp/ptp-proef.conf
 echo "--- poging 2: met een kopie in /tmp:"
 timeout 5 "$PTP4L" -f /tmp/ptp-proef.conf -i lo -S -m -l 6 2>&1 | head -3
+cp "$PTP4L" /tmp/mijn-ptp4l 2>/dev/null && chmod +x /tmp/mijn-ptp4l
+echo "--- poging 2b: met een kopie van ptp4l (zonder bestandsrechten):"
+timeout 5 /tmp/mijn-ptp4l -f /tmp/ptp-proef.conf -i lo -S -m -l 6 2>&1 | head -3
 echo "--- poging 3: zonder configuratiebestand, opties op de opdrachtregel:"
 timeout 5 "$PTP4L" -i lo -S -m -l 6 --serverOnly 1 --priority1 64 --network_transport L2 --uds_address /tmp/proef.sock 2>&1 | head -3
 EOF

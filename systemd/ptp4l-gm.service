@@ -1,0 +1,17 @@
+# PTP-GRANDMASTER — aangemaakt door ptp-grandmaster.sh
+[Unit]
+Description=PTP grandmaster op __DEV__ (ptp4l)
+Documentation=man:ptp4l(8)
+After=network-online.target sys-subsystem-net-devices-__DEV__.device
+Wants=sys-subsystem-net-devices-__DEV__.device
+Before=time-sync.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/ptp4l -f /etc/linuxptp/ptp4l-gm.conf -i __DEV__ -m
+Restart=always
+RestartSec=5
+Nice=-5
+
+[Install]
+WantedBy=multi-user.target

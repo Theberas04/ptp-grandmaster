@@ -1,0 +1,17 @@
+# PTP-CLIENT — aangemaakt door ptp-client.sh
+[Unit]
+Description=Klok van de netwerkkaart naar de systeemklok (phc2sys, __DEV__)
+Documentation=man:phc2sys(8)
+PartOf=ptp4l-klant.service
+After=ptp4l-klant.service sys-subsystem-net-devices-__DEV__.device
+
+[Service]
+Type=simple
+# Bij een client is de kaartklok de bron (-s __DEV__) en de systeemklok het doel.
+# -w wacht tot ptp4l op de grootmeester vergrendeld is.
+ExecStart=/usr/sbin/phc2sys -s __DEV__ -c CLOCK_REALTIME -w -m
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

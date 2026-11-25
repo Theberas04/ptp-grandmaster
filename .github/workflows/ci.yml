@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax van alle scripts
+        run: |
+          for f in ptp-grandmaster.sh ptp-client.sh ptp-status.sh tests/*.sh; do
+            bash -n "$f" && echo "ok: $f"
+          done
+
+      - name: shellcheck
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq shellcheck
+          # Alleen fouten die de werking raken; stijlwaarschuwingen laten we staan
+          shellcheck -S error ptp-grandmaster.sh ptp-client.sh ptp-status.sh tests/*.sh
+
+      - name: Testbank (nep-PTP-kaart en nep-diensten)
+        run: bash tests/test-installer.sh
+
+  sync-proef:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: linuxptp installeren
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq linuxptp
+
+      - name: Echte synchronisatieproef (grootmeester + client op een veth-paar)
+        run: sudo -E bash tests/test-lock.sh --streng

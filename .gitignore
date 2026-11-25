@@ -1,0 +1,4 @@
+# rommel van de testbank
+*.log
+*.bak.*
+__pycache__/

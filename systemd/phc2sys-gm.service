@@ -1,0 +1,17 @@
+# PTP-GRANDMASTER — aangemaakt door ptp-grandmaster.sh
+[Unit]
+Description=Klok van de netwerkkaart volgt de systeemklok (phc2sys, __DEV__)
+Documentation=man:phc2sys(8)
+PartOf=ptp4l-gm.service
+After=ptp4l-gm.service sys-subsystem-net-devices-__DEV__.device
+
+[Service]
+Type=simple
+# -s CLOCK_REALTIME -c __DEV__ : de systeemklok is de bron, de kaartklok het doel
+# (bij een client is het precies andersom: daar is de kaartklok de bron).
+ExecStart=/usr/sbin/phc2sys -s CLOCK_REALTIME -c __DEV__ -m
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

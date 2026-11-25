@@ -1,0 +1,15 @@
+# PTP-CLIENT — aangemaakt door ptp-client.sh
+[Unit]
+Description=PTP-client op __DEV__: volgt de grootmeester (ptp4l)
+Documentation=man:ptp4l(8)
+After=network-online.target sys-subsystem-net-devices-__DEV__.device
+Wants=sys-subsystem-net-devices-__DEV__.device
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/ptp4l -f /etc/linuxptp/ptp4l-klant.conf -i __DEV__ -m -s
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

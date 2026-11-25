@@ -132,7 +132,7 @@ printf '%s\n' "$UIT" | sed 's/^/    /'
 printf '%s\n' "$UIT" | grep -q "gekozen poort: enp1s0f1" \
     && { printf '  \033[32mok\033[0m   kiest de vrije poort met PTP-klok (enp1s0f1), niet de bridged poort\n'; GOED=$((GOED+1)); } \
     || { printf '  \033[31mFOUT\033[0m kiest niet enp1s0f1\n'; FOUT=$((FOUT+1)); }
-printf '%s\n' "$UIT" | grep -q "enp2s0.*hardware-tijdstempels: nee" \
+printf '%s\n' "$UIT" | grep -q "enp2s0.*hardware: nee (kaart heeft geen PTP-klok)" \
     && { printf '  \033[32mok\033[0m   herkent de kaart zonder PTP-klok\n'; GOED=$((GOED+1)); } \
     || { printf '  \033[31mFOUT\033[0m herkent enp2s0 niet als kaart zonder PTP-klok\n'; FOUT=$((FOUT+1)); }
 toets "--check verandert niets (geen config geschreven)" test ! -f "$R1/etc/linuxptp/ptp4l-gm.conf"

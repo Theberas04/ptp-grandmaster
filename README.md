@@ -49,9 +49,9 @@ Zo ziet dat eruit op een host met een Intel I350 (uitvoer uit de testbank, zie `
   ok   root
   ok   linuxptp is nog niet geïnstalleerd
   netwerkpoorten:
-    enp1s0f0     kaart: igb        PTP-klok: ptp0    hardware-tijdstempels: ja     in bridge: ja
-    enp1s0f1     kaart: igb        PTP-klok: ptp0    hardware-tijdstempels: ja     in bridge: nee
-    enp2s0       kaart: e1000e     PTP-klok: -       hardware-tijdstempels: nee (kaart heeft geen PTP-klok; alleen software-tijdstempels mogelijk)  in bridge: nee
+    enp1s0f0       kaart: igb       PTP-klok: ptp0  hardware: ja                             in bridge: ja
+    enp1s0f1       kaart: igb       PTP-klok: ptp0  hardware: ja                             in bridge: nee
+    enp2s0         kaart: e1000e    PTP-klok: -     hardware: nee (kaart heeft geen PTP-klok)  in bridge: nee
   ok   gekozen poort: enp1s0f1
   ok   systeemklok is gesynchroniseerd (NTP)
   --check: er is niets veranderd.

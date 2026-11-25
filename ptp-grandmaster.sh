@@ -100,14 +100,14 @@ done
 poort_regel() {
     local dev="$1"
     local pad="$PTP_SYSFS_NET/$dev" drv="" phc="" hw="nee" bridge="nee" reden=""
-    [ -e "$pad" ] || return 0
+    [ -d "$pad" ] || return 0          # bonding_masters is een bestand, geen poort
     [ "$dev" = "lo" ] && return 0
     case "$dev" in veth*|docker*|br-*|virbr*|tap*|tun*|fw*|wg*|zt*|tailscale*) return 0 ;; esac
 
     if [ -e "$pad/device/driver" ]; then
         drv="$(basename "$(readlink -f "$pad/device/driver")")"
     fi
-    [ -n "$drv" ] || reden="geen netwerkkaart (virtuele poort)"
+    [ -n "$drv" ] || reden="virtuele poort (geen netwerkkaart)"
 
     if [ -d "$pad/device/ptp" ]; then
         phc="$(basename "$(ls -d "$pad/device/ptp/"ptp* 2>/dev/null | head -1)")"
@@ -122,18 +122,14 @@ poort_regel() {
         done
     fi
 
-    if [ -n "$phc" ] && [ -e "$PTP_DEV_DIR/$phc" ]; then
-        if [ "$SOFTWARE" = "1" ]; then
-            hw="nee (-SOFTWARE=1: we gebruiken software-tijdstempels)"
-        else
-            hw="ja"
-        fi
-    elif [ "$SOFTWARE" = "1" ]; then
-        hw="nee (-SOFTWARE=1)"
+    if [ "$SOFTWARE" = "1" ]; then
+        hw="nee (SOFTWARE=1: software-tijdstempels)"
+    elif [ -n "$phc" ] && [ -e "$PTP_DEV_DIR/$phc" ]; then
+        hw="ja"
     elif [ -n "$reden" ]; then
         hw="nee ($reden)"
     else
-        hw="nee (kaart heeft geen PTP-klok; alleen software-tijdstempels mogelijk)"
+        hw="nee (kaart heeft geen PTP-klok)"
     fi
 
     if [ -e "$pad/brport" ] || [ -n "$(ls -d "$PTP_SYSFS_NET/$dev/upper/"* 2>/dev/null)" ]; then
@@ -190,7 +186,7 @@ if [ -z "$POORTEN" ]; then
 else
     while IFS='|' read -r dev drv phc hw bridge; do
         [ -n "$dev" ] || continue
-        zeg "    $(printf '%-12s' "$dev") kaart: $(printf '%-10s' "$drv") PTP-klok: $(printf '%-7s' "$phc") hardware-tijdstempels: $(printf '%-6s' "$hw") in bridge: $bridge"
+        zeg "    $(printf '%-14s' "$dev") kaart: $(printf '%-9s' "$drv") PTP-klok: $(printf '%-5s' "$phc") hardware: $(printf '%-28s' "$hw") in bridge: $bridge"
     done <<< "$POORTEN"
 fi
 

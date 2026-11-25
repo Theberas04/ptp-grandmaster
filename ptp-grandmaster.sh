@@ -383,7 +383,7 @@ fi
 # ------------------------------------------------------------------ bewijs
 
 stap "Bewijs dat het draait"
-timeout 20 sh -c "while [ ! -S /run/ptp4l ]; do sleep 0.5; done" 2>/dev/null
+timeout 20 sh -c "while [ ! -S $UDS ]; do sleep 0.5; done" 2>/dev/null
 sleep 3
 
 if [ -x /usr/sbin/pmc ]; then

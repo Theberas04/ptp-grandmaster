@@ -140,11 +140,19 @@ fi
 if grep -q 'failed to open configuration file' "$WERK/math.log" "$WERK/klant.log" 2>/dev/null; then
     printf '\n  --- diagnose: ptp4l kan de configuratie niet lezen ---\n'
     cat > "$WERK/diagnose.sh" <<EOF
-id -u; id
-ls -ld "$WERK" "$K" "$K/etc" "$K/etc/linuxptp"
-ls -l "$GM_CONF"
-head -c 60 "$GM_CONF"; echo
-grep -E ' /tmp | / ' /proc/mounts | head -4
+echo "wie: \$(id -u) \$(id -un 2>/dev/null), caps: \$(grep -E '^CapEff' /proc/self/status)"
+ls -ld "$WERK" "$K/etc/linuxptp"; ls -l "$GM_CONF"
+echo "leesproef: \$(head -c 30 "$GM_CONF" | tr '\n' ' ')"
+echo "bestandsrechten van ptp4l: \$(ls -l "$PTP4L" 2>/dev/null)"
+command -v getcap >/dev/null && getcap "$PTP4L" 2>&1
+echo "apparmor: \$(cat /sys/module/apparmor/parameters/enabled 2>/dev/null), \$(cat /proc/self/attr/current 2>/dev/null)"
+echo "--- poging 1: met de configuratie uit de kit:"
+"$PTP4L" -f "$GM_CONF" -i lo -S -m -l 3 2>&1 | head -3
+cp "$GM_CONF" /tmp/ptp-proef.conf; chmod 666 /tmp/ptp-proef.conf
+echo "--- poging 2: met een kopie in /tmp:"
+"$PTP4L" -f /tmp/ptp-proef.conf -i lo -S -m -l 3 2>&1 | head -3
+echo "--- poging 3: zonder configuratiebestand, opties op de opdrachtregel:"
+"$PTP4L" -i lo -S -m -l 3 --serverOnly 1 --priority1 64 --network_transport L2 --uds_address /tmp/proef.sock 2>&1 | head -3
 EOF
     $NS bash "$WERK/diagnose.sh" 2>&1 | sed 's/^/    /'
 fi

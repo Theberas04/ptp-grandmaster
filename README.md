@@ -184,9 +184,21 @@ bash tests/test-lock.sh         # échte proef: grootmeester + client op een vir
 ```
 
 `test-lock.sh` haalt zo nodig het Debian-pakket `linuxptp` op, pakt het uit (zonder root), en laat twee
-`ptp4l`-processen in een eigen netwerknaamruimte echt synchroniseren — met de configuraties die de
-installateur schrijft. De proef meet en print de afwijking en zakt door de mand boven 100 µs. Dit draait
-ook in CI (`.github/workflows/ci.yml`).
+`ptp4l`-processen in een eigen netwerknaamruimte echt synchroniseren — met precies de configuraties die de
+installateur schrijft. De proef meet en print de afwijking en zakt door de mand boven 100 µs.
+
+Uitkomst van die proef op een virtuele kabel (software-tijdstempels, dus de zwaarste omstandigheid):
+
+```
+  ok   de grootmeester neemt de grootmeesterrol aan
+  ok   de client vergrendelt op de grootmeester
+  19 metingen: mediaan 288 ns, hoogste 2301 ns
+```
+
+In CI (`.github/workflows/ci.yml`) draait deze proef op **Debian 13**, de doelomgeving. Op een
+Ubuntu-runner bleek `ptp4l` 4.4 geen enkel configuratiebestand te kunnen openen — ook een 0666-kopie in
+`/tmp` niet, terwijl `bash` datzelfde bestand wel las. Dat is een eigenaardigheid van die omgeving, geen
+fout in deze kit; op Debian en in de testbank hierboven werkt het wel.
 
 ## Bestanden
 

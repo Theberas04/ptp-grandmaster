@@ -28,9 +28,10 @@ jobs:
         run: bash tests/test-installer.sh
 
   sync-proef:
-    # De proef draait op Debian 13: dat is de doelomgeving (linuxptp 4.2) en
-    # daar kunnen we een eigen netwerknaamruimte maken. Ubuntu's ptp4l 4.4 op de
-    # runner kan geen configuratiebestand openen (zie het Ubuntu-proefje hieronder).
+    # De proef draait op Debian 13: dat is de doelomgeving (linuxptp 4.2) en daar
+    # kunnen we met --privileged een eigen netwerknaamruimte maken. Op de
+    # Ubuntu-runner zelf (linuxptp 4.4) kon ptp4l geen enkel configuratiebestand
+    # openen, ook geen 0666-kopie in /tmp, terwijl bash datzelfde bestand wel las.
     runs-on: ubuntu-latest
     container:
       image: debian:13
@@ -46,11 +47,3 @@ jobs:
       - name: Echte synchronisatieproef (grootmeester + client op een veth-paar)
         run: bash tests/test-lock.sh --streng
 
-      - name: Ubuntu-proefje (waarom de proef niet op Ubuntu draait)
-        if: always()
-        run: |
-          printf '# proef\ndomainNumber 0\n' > /tmp/proef.conf
-          chmod 666 /tmp/proef.conf
-          echo "leesproef: $(cat /tmp/proef.conf | tr '\n' ' ')"
-          echo "ptp4l-versie: $(ptp4l -v 2>&1)"
-          timeout 5 ptp4l -f /tmp/proef.conf -i lo -S -m 2>&1 | head -2 || true
